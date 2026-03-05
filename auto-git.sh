@@ -26,6 +26,7 @@ git switch "$selected"
 }
 
 function merge () {
+    echo "Joe"
 
 selected=$(git branch | fzf +m \
     --height 100% \
