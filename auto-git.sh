@@ -1,5 +1,13 @@
 #!/bin/bash
 
-hello="Hello World"
+selected=$(git branch | fzf \
+--height 40% \
+--layout reverse \
+--border \
+--preview 'git log --oneline')
 
-echo $hello
+selected=$(echo $selected | tr -d '* ')
+
+echo "$selected"
+
+git switch "$selected"
