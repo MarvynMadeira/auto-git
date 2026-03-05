@@ -11,6 +11,7 @@ function exit_exception (){
 function switch_branch () {
 
 selected=$(git branch | fzf +m \
+    --header "Select the branch to go:" \
     --height 40% \
     --layout reverse \
     --border \
@@ -28,6 +29,7 @@ git switch "$selected"
 function merge () {
 
 selected=$(git branch | fzf +m \
+    --header "Select the branch to merge:" \
     --height 100% \
     --layout reverse \
     --border \
@@ -40,9 +42,12 @@ selected=$(echo $selected | tr -d '* ')
 git merge "$selected"
 }
 
+# function create_branch () {}
+
 function delete_branch () {
 
 selected=$(git branch | fzf +m \
+    --header "Select the branch to delete:" \
     --height 40% \
     --layout reverse \
     --border \
@@ -64,11 +69,38 @@ function main (){
     )
 
     selected=$(for opt in "${options[@]}" ; do echo $opt ; done | fzf +m \
+    --header "Select one option:" \
     --height 40% \
     --layout reverse \
     --border \
     --color bg:#222222 \
     )
+
+    exit_exception
+
+    case "$selected" in
+        ${options[0]})
+            echo "$selected"
+            switch_branch
+            exit 0
+            ;;
+        ${options[1]})
+            echo "$selected"
+            merge
+            exit 0
+            ;;
+        ${options[2]})
+            echo "$selected"
+            delete_branch
+            exit 0
+            ;;
+        ${options[3]})
+            echo "$selected"
+            exit 0
+            ;;
+        *)
+        exit 0
+    esac
 }
 
 main
