@@ -47,7 +47,7 @@ function create_branch (){
     fi
 }
 
-function delete_branch () {
+function delete_branch (){
 
     selected=$(git branch | fzf +m $FZF_COMMON \
         --header "Select the branch to DELETE:" \
@@ -69,20 +69,19 @@ function delete_branch () {
     fi
 }
 
-function merge () {
+function merge (){
+    current=$(git branch | grep "^\*" | tr -d "* ")
 
-selected=$(git branch | fzf +m \
-    --header "Select the branch to merge:" \
-    --height 100% \
-    --layout reverse \
-    --border \
-    --preview \
-        'git -c color.ui=always diff $(git branch | grep "^\*" | tr -d "* ") $(echo {} | tr -d "* ")' \
-    --color bg:#222222,preview-bg:#333333)
+    selected=$(git branch | grep -v "^\*" | fzf +m $FZF_COMMON \
+        --header "Merge into [$current]:" \
+        --preview \
+            'git -c color.ui=always diff $current $(echo {} | tr -d "* ")')
 
-selected=$(echo $selected | tr -d '* ')
+    exit_exception
 
-git merge "$selected"
+    selected=$(echo $selected | tr -d '* ')
+
+    git merge "$selected"
 }
 
 
