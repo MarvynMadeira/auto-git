@@ -2,7 +2,7 @@
 
 FZF_COMMON="--height 50% --layout reverse --border --color bg:#1a1a2e,preview-bg:#16213e,fg:#e0e0e0,hl:#00d4ff,border:#333366"
 
-function exit_exception (){
+function exit_exception() {
     if [ $? -eq 130 ]; then
     echo "Exiting..."
     exit 1
@@ -12,7 +12,7 @@ function exit_exception (){
 
 # Branchs and Merge
 
-function switch_branch (){
+function switch_branch() {
 
     selected=$(git branch | fzf +m $FZF_COMMON \
         --header "Select the branch to go:" \
@@ -26,7 +26,7 @@ function switch_branch (){
     git switch "$selected"
 }
 
-function create_branch (){
+function create_branch() {
     echo -n " New branch name: "
     read -r branch_name
 
@@ -49,7 +49,7 @@ function create_branch (){
     fi
 }
 
-function delete_branch (){
+function delete_branch() {
 
     selected=$(git branch | fzf +m $FZF_COMMON \
         --header "Select the branch to DELETE:" \
@@ -71,7 +71,7 @@ function delete_branch (){
     fi
 }
 
-function merge (){
+function merge() {
     current=$(git branch | grep "^\*" | tr -d "* ")
 
     selected=$(git branch | grep -v "^\*" | fzf +m $FZF_COMMON \
@@ -86,7 +86,7 @@ function merge (){
     git merge "$selected"
 }
 
-function rebase (){
+function rebase() {
     current=$(git branch | grep "^\*" | tr -d "* ")
 
     selected=$(git branch | grep -v "^\*" | fzf +m $FZF_COMMON \
@@ -105,7 +105,7 @@ function rebase (){
 
 # Commit and Stash
 
-function interactive_commit (){
+function interactive_commit() {
     status=$(git status --short)
 
     if [ -z "$status" ]; then
@@ -146,7 +146,7 @@ function interactive_commit (){
     git commit -m "$msg"
 }
 
-function amend_commit (){
+function amend_commit() {
     echo "Last commit: $(git log --oneline -1)"
     echo ""
     echo -n "New commit message:"
@@ -160,7 +160,7 @@ function amend_commit (){
     git commit --amend -m "$msg"
 }
 
-function cherry_pick (){
+function cherry_pick() {
     selected=$(git log --oneline --all | fzf +m $FZF_COMMON \
         --header "Select commit to cherry-pick:" \
         --preview \
@@ -173,7 +173,7 @@ function cherry_pick (){
     git cherry-pick "$hash"
 }
 
-function reset_commits (){
+function reset_commits() {
     echo "Last 10 commits:"
     git log --oneline -10
     echo ""
@@ -197,7 +197,7 @@ function reset_commits (){
     fi
 }
 
-function stash_save (){
+function stash_save() {
     echo -n "Stash description (optional): "
     read -r desc
 
@@ -210,7 +210,7 @@ function stash_save (){
     echo "Stash saved."
 }
 
-function stash_apply (){
+function stash_apply() {
     stash_list=$(git stash list)
 
     if [ -z "$stash_list" ]; then
@@ -238,7 +238,7 @@ function stash_apply (){
     fi
 }
 
-function stash_drop (){
+function stash_drop() {
     stash_list=$(git stash list)
 
     if [ -z "$stash_list" ]; then
@@ -258,7 +258,7 @@ function stash_drop (){
 
 # TAGS
 
-function create_tag (){
+function create_tag() {
     echo -n "Tag name (ex: V1.0):"
     read -r tag_name
 
@@ -303,6 +303,51 @@ function create_tag (){
     if [[ "$push_tag" == "y" || "$push_tag" == "Y" ]]; then
         git push origin "$tag_name"
     fi
+}
+
+function checkout_tag() {
+    selected=$(git tag -l | fzf +m $FZF_COMMON \
+        --header "  Navigate to tag (detached HEAD)" \
+        --preview 'git show --color {}')
+
+    exit_exception
+    git checkout "$selected"
+}
+
+# LOG & DIFF
+
+function visual_log() {
+    git log --oneline --all | fzf +m $FZF_COMMON \
+        --header "  Git Log — ENTER to inspect commit" \
+        --preview 'git show --color $(echo {} | awk "{print \$1}")' \
+        | awk '{print $1}' | xargs -I{} git show --color {}
+}
+
+function diff_branches() {
+    current=$(git branch | grep "^\*" | tr -d '* ')
+
+    selected=$(git branch | grep -v "^\*" | fzf +m $FZF_COMMON \
+        --header "  Diff [$current] vs..." \
+        --preview "git -c color.ui=always diff $current \$(echo {} | tr -d '* ')")
+
+    exit_exception
+    selected=$(echo "$selected" | tr -d '* ')
+    git diff "$current" "$selected"
+}
+
+# LOG & DIFF
+
+function require_gh() {
+    if ! command -v gh &>/dev/null; then
+        echo "[ERROR] This function req GitHub CLI (gh)."
+        echo "Install with: https://cli.github.com or terminal command"
+        return 1
+    fi
+    return 0
+}
+
+function create_pr() {
+    require_gh || return
 }
 
 
