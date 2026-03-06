@@ -12,16 +12,61 @@ function exit_exception (){
 
 function switch_branch (){
 
-selected=$(git branch | fzf +m $FZF_COMMON \
-    --header "Select the branch to go:" \
-    --preview \
+    selected=$(git branch | fzf +m $FZF_COMMON \
+        --header "Select the branch to go:" \
+        --preview \
+            'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")')
+
+    exit_exception
+
+    selected=$(echo $selected | tr -d '* ')
+
+    git switch "$selected"
+}
+
+function create_branch (){
+    echo -n " New branch name: "
+    read -r branch_name
+
+    if [ -z "$branch_name" ]; then
+        echo "No branch name provided. Aborting."
+        exit 1
+    fi
+    
+    echo ""
+    base=$(git branch | fzf +m $FZF_COMMON \
+    --header "Select the base branch (ESC = use current)" \
+    ---preview \
         'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")')
 
-exit_exception
+    if [ -z "$base"]; then
+        git switch -c "$branch_name"
+    else
+        base=$(echo $base | tr -d '* ')
+        git switch -c "$branch_name" "$base"
+    fi
+}
 
-selected=$(echo $selected | tr -d '* ')
+function delete_branch () {
 
-git switch "$selected"
+    selected=$(git branch | fzf +m $FZF_COMMON \
+        --header "Select the branch to DELETE:" \
+        --preview \
+            'git -c color.ui=always diff $(git branch | grep "^\*" | tr -d "* ") $(echo {} | tr -d "* ")')
+        
+    exit_exception
+
+    selected=$(echo $selected | tr -d '* ')
+
+    echo ""
+    echo -n "Force delete? (y/n): "
+    read -r force
+
+    if [[ "$force" == "y" || "$force" == "Y" ]]; then
+        git branch -D "$selected"
+    else
+        git branch -d "$selected"
+    fi
 }
 
 function merge () {
@@ -40,23 +85,8 @@ selected=$(echo $selected | tr -d '* ')
 git merge "$selected"
 }
 
-# function create_branch () {}
 
-function delete_branch () {
 
-selected=$(git branch | fzf +m \
-    --header "Select the branch to delete:" \
-    --height 40% \
-    --layout reverse \
-    --border \
-    --preview \
-        'git -c color.ui=always diff $(git branch | grep "^\*" | tr -d "* ") $(echo {} | tr -d "* ")' \
-    --color bg:#222222,preview-bg:#333333)
-
-selected=$(echo $selected | tr -d '* ')
-
-git branch -d "$selected"
-}
 
 function main (){
     options=(\
