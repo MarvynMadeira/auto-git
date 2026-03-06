@@ -10,6 +10,8 @@ function exit_exception (){
     fi
 }
 
+# Branchs and Merge
+
 function switch_branch (){
 
     selected=$(git branch | fzf +m $FZF_COMMON \
@@ -99,6 +101,49 @@ function rebase (){
     echo "Rebasing '$current' onto '$selected'..."
     
     git rebase "$selected"
+}
+
+# Commit and Stash
+
+function interactive_commit (){
+    status=$(git status --short)
+
+    if [ -z "$status" ]; then
+        echo "Nothing to commit."
+        return
+    fi
+
+    echo -n "Current status:"
+    git status --short
+    echo ""
+
+    echo -n "Stage all files? (y/n): "
+    read -r stage_all
+
+    if [[ "$stage_all" == "y" || "$stage_all" == "Y" ]]; then
+        git add .
+    else
+        echo "Select files to stage:"
+        selected=$(echo "$status" | fzf +m $FZF_COMMON \
+            --header "Select files to stage (TAB = multi-select):" \
+            --preview \
+                'git diff --color $(echo {} | awk "{print \$2}")')
+
+        exit_exception
+
+        echo "$selected" | awk '{print $2}' | xargs git add
+    fi
+
+    echo ""
+    echo -n "Enter commit message: "
+    read -r msg
+
+    if [ -z "$msg" ]; then
+        echo "No commit message provided. Aborting."
+        return
+    fi
+
+    git commit -m "$msg"
 }
 
 
