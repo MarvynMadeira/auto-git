@@ -146,6 +146,97 @@ function interactive_commit (){
     git commit -m "$msg"
 }
 
+function amend_commit (){
+    echo "Last commit: $(git log --oneline -1)"
+    echo ""
+    echo -n "New commit message:"
+    read -r msg
+
+    if [ -z "$msg" ]; then
+        echo "No commit message provided. Aborting."
+        return
+    fi
+
+    git commit --amend -m "$msg"
+}
+
+function cherry_pick (){
+    selected=$(git log --oneline --all | fzf +m $FZF_COMMON \
+        --header "Select commit to cherry-pick:" \
+        --preview \
+            'git show --color $(echo {} | awk "{print \$1}")')
+
+    exit_exception
+
+    hash=$(echo $selected | awk '{print $1}')
+
+    git cherry-pick "$hash"
+}
+
+function reset_commits (){
+    echo "Last 10 commits:"
+    git log --oneline -10
+    echo ""
+    echo -n "How many commits to reset from HEAD? (ex: 1, 2):"
+    read -r qty
+
+    if ! [[ "$qty" =~ ^[0-9]+$ ]]; then
+        echo "Invalid number. Aborting."
+        return
+    fi
+
+    echo ""
+    echo -n "Hard reset? WARNING: changes will be LOST! (y/n): "
+    read -r hard
+
+    if [[ "$hard" == "y" || "$hard" == "Y" ]]; then
+        git reset --hard HEAD~"$qty"
+    else
+        git reset --soft HEAD~"$qty"
+        echo "Soft reset done. Changes kept in staging"
+    fi
+}
+
+function stash_save (){
+    echo -n "Stash description (optional): "
+    read -r desc
+
+    if [ -z "$desc" ]; then
+        git stash
+    else
+        git stash save "$desc"
+    fi
+
+    echo "Stash saved."
+}
+
+function stash_apply (){
+    stash_list=$(git stash list)
+
+    if [ -z "$stash_list" ]; then
+        echo "No stashes found."
+        return
+    fi
+
+    selected=$(echo "$stash_list" | fzf +m $FZF_COMMON \
+        --header "Select stash to apply:" \
+        --preview \
+            'git stash show -p $(echo {} | cut -d: -f1)')
+
+    exit_exception
+
+    stash_id=$(echo $selected | cut -d: -f1)
+
+    echo ""
+    echo -n "Pop stash (removes after applying)? (y/n): "
+    read -r pop
+
+    if [[ "$pop" == "y" || "$pop" == "Y" ]]; then
+        git stash pop "$stash_id"
+    else
+        git stash apply "$stash_id"
+    fi
+}
 
 function main (){
     options=(\
