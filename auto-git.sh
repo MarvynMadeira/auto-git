@@ -311,6 +311,7 @@ function checkout_tag() {
         --preview 'git show --color {}')
 
     exit_exception
+
     git checkout "$selected"
 }
 
@@ -331,7 +332,9 @@ function diff_branches() {
         --preview "git -c color.ui=always diff $current \$(echo {} | tr -d '* ')")
 
     exit_exception
+
     selected=$(echo "$selected" | tr -d '* ')
+
     git diff "$current" "$selected"
 }
 
@@ -348,7 +351,72 @@ function require_gh() {
 
 function create_pr() {
     require_gh || return
+
+    current=$(git branch | grep "^\*" | tr -d '* ')
+
+    if ! git ls-remote --exit-code --heads origin "$current" &>/dev/null; then
+        echo "Branch '$current' doesn't exists in remote."
+        echo -n "Do you want push now? (y/n): "
+        read -r do_push
+
+        if [["$do_push" == "y" || "$do_push" == "Y"]]; then
+            git push -u origin "$current"
+        else
+            echo "Aborting. Push the branch before opening PR."
+            return
+        fi
+    fi
+
+    echo ""
+    base=$(git branch -r | grep -v "HEAD" | sed 's/origin\///' | tr -d ' ' | \
+        fzf +m $FZF_COMMON \
+        --header "Branch's PR destiny (base)" \
+        --preview "git -c color.ui=always log --oneline origin/{}")
+
+    exit_exception
+
+    echo ""
+    echo -n "PR Title: "
+    read -r pr_title
+
+    if [ -z "$pr_title" ]; then
+        echo "Title's required. Aborting."
+        return
+    fi
+
+    echo ""
+    echo -n "PR description (optional, Enter to skip): "
+    read -r pr_body
+
+    echo ""
+    echo -n "Mark as Draft? (y/n): "
+    read -r draft
+
+    echo ""
+    echo "Resume:"
+    echo "Branch: $current → $base"
+    echo "Title: $pr_title"
+    [ -n "$pr_body" ] && "Desc:    $pr_body"
+    [[ "$draft" == "y" || "$draft" == "Y" ]] && echo "  Mode:    Draft"
+    echo ""
+    echo -n "Confirm PR opening? (y/n): "
+    read -r confirm
+
+    if [["$confirm" != "y" && "$confirm" != "Y"]]; then
+        echo "PR aborted."
+        return
+    fi
+
+    #Dynamic command
+    pr_cmd="gh pr create --base \"$base\" --title \"$pr_title\""
+    [ -n "$pr_body" ]                          && pr_cmd+=" --body \"$pr_body\""
+    [[ "$draft" == "y" || "$draft" == "Y" ]]   && pr_cmd+=" --draft"
+
+    eval "$pr_cmd"
 }
+
+# REMOTE
+
 
 
 
