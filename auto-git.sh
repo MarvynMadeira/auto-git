@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+FZF_COMMON="--height 50% --layout reverse --border --color bg:#1a1a2e,preview-bg:#16213e,fg:#e0e0e0,hl:#00d4ff,border:#333366"
+
 function exit_exception (){
     if [ $? -eq 130 ]; then
     echo "Exiting..."
@@ -8,16 +10,12 @@ function exit_exception (){
     fi
 }
 
-function switch_branch () {
+function switch_branch (){
 
-selected=$(git branch | fzf +m \
+selected=$(git branch | fzf +m $FZF_COMMON \
     --header "Select the branch to go:" \
-    --height 40% \
-    --layout reverse \
-    --border \
     --preview \
-        'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")' \
-    --color bg:#222222,preview-bg:#333333)
+        'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")')
 
 exit_exception
 
