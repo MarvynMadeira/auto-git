@@ -458,46 +458,103 @@ function push_pull() {
 
 
 function main (){
-    options=(\
-    "1 - Switch Branch" \
-    "2 - Git Merge" \
-    "3 - Delete Branch" \
-    "Exit" \
+    options=(
+        "  BRANCH  │ Switch Branch"
+        "  BRANCH  │ Create Branch"
+        "  BRANCH  │ Delete Branch"
+        "  BRANCH  │ Merge Branch"
+        "  BRANCH  │ Rebase Branch"
+        "  COMMIT  │ Interactive Commit"
+        "  COMMIT  │ Amend Last Commit"
+        "  COMMIT  │ Cherry-pick Commit"
+        "  COMMIT  │ Reset Commits"
+        "  STASH   │ Save Stash"
+        "  STASH   │ Apply Stash"
+        "  STASH   │ Drop Stash"
+        "  TAG     │ Create Tag"
+        "  TAG     │ Checkout Tag"
+        "  LOG     │ Visual Log"
+        "  LOG     │ Diff Branches"
+        "  PR      │ Abrir Pull Request"
+        "  REMOTE  │ Push / Pull / Fetch"
+        "  ──────────────────────────────"
+        "  EXIT"
     )
 
-    selected=$(for opt in "${options[@]}" ; do echo $opt ; done | fzf +m \
-    --header "Select one option:" \
-    --height 40% \
-    --layout reverse \
-    --border \
-    --color bg:#222222 \
-    )
+    selected=$(for opt in "${options[@]}"; do echo "$opt"; done | fzf +m \
+        --height 70% \
+        --layout reverse \
+        --border \
+        --header "  GITFLOW  [DEVELOPER] — Select an action" \
+        --color "bg:#1a1a2e,fg:#e0e0e0,hl:#00d4ff,border:#333366,header:#00d4ff" \
+        --no-sort)
 
     exit_exception
 
     case "$selected" in
-        ${options[0]})
-            echo "$selected"
-            switch_branch
-            exit 0
-            ;;
-        ${options[1]})
-            echo "$selected"
-            merge
-            exit 0
-            ;;
-        ${options[2]})
-            echo "$selected"
-            delete_branch
-            exit 0
-            ;;
-        ${options[3]})
-            echo "$selected"
-            exit 0
-            ;;
-        *)
-        exit 0
+        *"Switch Branch")       echo ""; switch_branch ;;
+        *"Create Branch")       echo ""; create_branch ;;
+        *"Delete Branch")       echo ""; delete_branch ;;
+        *"Merge Branch")        echo ""; merge_branch ;;
+        *"Rebase Branch")       echo ""; rebase_branch ;;
+        *"Interactive Commit")  echo ""; interactive_commit ;;
+        *"Amend Last Commit")   echo ""; amend_commit ;;
+        *"Cherry-pick Commit")  echo ""; cherry_pick ;;
+        *"Reset Commits")       echo ""; reset_commits ;;
+        *"Save Stash")          echo ""; stash_save ;;
+        *"Apply Stash")         echo ""; stash_apply ;;
+        *"Drop Stash")          echo ""; stash_drop ;;
+        *"Create Tag")          echo ""; create_tag ;;
+        *"Checkout Tag")        echo ""; checkout_tag ;;
+        *"Visual Log")          echo ""; visual_log ;;
+        *"Diff Branches")       echo ""; diff_branches ;;
+        *"Abrir Pull Request")   echo ""; create_pr ;;
+        *"Push / Pull / Fetch") echo ""; push_pull ;;
+        *"EXIT"|*"──────")      exit 0 ;;
+        *) exit 0 ;;
     esac
+
+
+    # options=(\
+    # "1 - Switch Branch" \
+    # "2 - Git Merge" \
+    # "3 - Delete Branch" \
+    # "Exit" \
+    # )
+
+    # selected=$(for opt in "${options[@]}" ; do echo $opt ; done | fzf +m \
+    # --header "Select one option:" \
+    # --height 40% \
+    # --layout reverse \
+    # --border \
+    # --color bg:#222222 \
+    # )
+
+    # exit_exception
+
+    # case "$selected" in
+    #     ${options[0]})
+    #         echo "$selected"
+    #         switch_branch
+    #         exit 0
+    #         ;;
+    #     ${options[1]})
+    #         echo "$selected"
+    #         merge
+    #         exit 0
+    #         ;;
+    #     ${options[2]})
+    #         echo "$selected"
+    #         delete_branch
+    #         exit 0
+    #         ;;
+    #     ${options[3]})
+    #         echo "$selected"
+    #         exit 0
+    #         ;;
+    #     *)
+    #     exit 0
+    # esac
 }
 
 main
