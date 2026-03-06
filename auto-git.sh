@@ -14,7 +14,7 @@ function exit_exception() {
 function switch_branch() {
 
     selected=$(git branch | fzf +m $FZF_COMMON \
-        --header "Select the branch to go:" \
+        --header "Select the branch to go: " \
         --preview \
             'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")')
 
@@ -126,7 +126,7 @@ function interactive_commit() {
         return
     fi
 
-    echo -n "Current status:"
+    echo -n "Current status: "
     git status --short
     echo ""
 
@@ -136,9 +136,9 @@ function interactive_commit() {
     if [[ "$stage_all" == "y" || "$stage_all" == "Y" ]]; then
         git add .
     else
-        echo "Select files to stage:"
+        echo "Select files to stage: "
         selected=$(echo "$status" | fzf +m $FZF_COMMON \
-            --header "Select files to stage (TAB = multi-select):" \
+            --header "Select files to stage (TAB = multi-select): " \
             --preview \
                 'git diff --color $(echo {} | awk "{print \$2}")')
 
@@ -162,7 +162,7 @@ function interactive_commit() {
 function amend_commit() {
     echo "Last commit: $(git log --oneline -1)"
     echo ""
-    echo -n "New commit message:"
+    echo -n "New commit message: "
     read -r msg
 
     if [ -z "$msg" ]; then
@@ -175,7 +175,7 @@ function amend_commit() {
 
 function cherry_pick() {
     selected=$(git log --oneline --all | fzf +m $FZF_COMMON \
-        --header "Select commit to cherry-pick:" \
+        --header "Select commit to cherry-pick: " \
         --preview \
             'git show --color $(echo {} | awk "{print \$1}")')
 
@@ -187,10 +187,10 @@ function cherry_pick() {
 }
 
 function reset_commits() {
-    echo "Last 10 commits:"
+    echo "Last 10 commits: "
     git log --oneline -10
     echo ""
-    echo -n "How many commits to reset from HEAD? (ex: 1, 2):"
+    echo -n "How many commits to reset from HEAD? (ex: 1, 2): "
     read -r qty
 
     if ! [[ "$qty" =~ ^[0-9]+$ ]]; then
@@ -447,7 +447,7 @@ function push_pull() {
                 echo ""
 
                 remote=$(git remote | fzf +m $FZF_COMMON \
-                    --header "Select the remote's destiny:" \
+                    --header "Select the remote's destiny: " \
                     --preview "git remote get-url {}")
 
                 exit_exception
