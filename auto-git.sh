@@ -52,22 +52,36 @@ function create_branch() {
 function delete_branch() {
 
     selected=$(git branch | fzf +m $FZF_COMMON \
-        --header "Select the branch to DELETE:" \
-        --preview \
-            'git -c color.ui=always diff $(git branch | grep "^\*" | tr -d "* ") $(echo {} | tr -d "* ")')
-        
-    exit_exception
+        --header "Select branch to DELETE:" \
+        --preview 'git -c color.ui=always log --oneline $(echo {} | tr -d "* ")')
 
-    selected=$(echo $selected | tr -d '* ')
+    [ -z "$selected" ] && return
+    selected=$(echo "$selected" | tr -d '* ')
 
     echo ""
-    echo -n "Force delete? (y/n): "
+    echo -n "  Force delete? (y/n): "
     read -r force
 
     if [[ "$force" == "y" || "$force" == "Y" ]]; then
         git branch -D "$selected"
     else
         git branch -d "$selected"
+        [ $? -ne 0 ] && return
+    fi
+
+    echo ""
+
+    if git ls-remote --exit-code --heads origin "$selected" &>/dev/null; then
+        echo -n "Do you want to DELETE the branch in remote repository? (y/n): "
+        read -r remote_del
+        if [[ "$remote_del" == "y" || "$remote_del" == "Y" ]]; then
+            git push origin --delete "$selected"
+            echo "Branch '$selected' deleted local and remote."
+        else
+            echo "Branch '$selected' deleted only local."
+        fi
+    else
+        echo "Branch '$selected' deleted ony local (was not exists in remote)."
     fi
 }
 
@@ -513,7 +527,6 @@ function main (){
         *"EXIT"|*"──────")      exit 0 ;;
         *) exit 0 ;;
     esac
-
 }
 
 main
