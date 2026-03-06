@@ -4,9 +4,8 @@ FZF_COMMON="--height 50% --layout reverse --border --color bg:#1a1a2e,preview-bg
 
 function exit_exception() {
     if [ $? -eq 130 ]; then
-    echo "Exiting..."
-    exit 1
-
+        echo "Exiting..."
+        exit 1
     fi
 }
 
