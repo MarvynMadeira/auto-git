@@ -258,6 +258,52 @@ function stash_drop (){
 
 # TAGS
 
+function create_tag (){
+    echo -n "Tag name (ex: V1.0):"
+    read -r tag_name
+
+    if [ -z "$tag_name" ]; then
+        acho "No tag name. Aborting."
+        return
+    fi
+
+    echo ""
+    echo -n "Tag description:"
+    read -r tag_desc
+
+    echo ""
+    echo -n "Tag a specific commit? (y/n - n = current HEAD): "
+    read -r specific
+
+    if [[ "$specific" == "y" || "$specific" == "Y" ]]; then
+        commit=$(git log --oneline | fzf +m $FZF_COMMON \
+            --header "  Select commit for tag [$tag_name]" \
+            --preview 'git show --color $(echo {} | awk "{print \$1}")')
+        exit_exception
+        hash=$(echo "$commit" | awk '{print $1}')
+
+        if [ -z "$tag_desc" ]; then
+            git tag "$tag_name" "$hash"
+        else
+            git tag -a "$tag_name" "$hash" -m "$tag_desc"
+        fi
+    else
+        if [ -z "$tag_desc" ]; then
+            git tag "$tag_name"
+        else
+            git tag -a "$tag_name" -m "$tag_desc"
+        fi
+    fi
+
+    echo "  Tag '$tag_name' created."
+    echo ""
+    echo -n "  Push tag to origin? (y/n): "
+    read -r push_tag
+
+    if [[ "$push_tag" == "y" || "$push_tag" == "Y" ]]; then
+        git push origin "$tag_name"
+    fi
+}
 
 
 
