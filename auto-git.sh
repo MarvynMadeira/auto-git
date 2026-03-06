@@ -489,7 +489,7 @@ function main (){
         "  TAG     │ Checkout Tag"
         "  LOG     │ Visual Log"
         "  LOG     │ Diff Branches"
-        "  PR      │ Abrir Pull Request"
+        "  PR      │ Open Pull Request"
         "  REMOTE  │ Push / Pull / Fetch"
         "  ──────────────────────────────"
         "  EXIT"
