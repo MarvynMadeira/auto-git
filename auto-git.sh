@@ -514,47 +514,6 @@ function main (){
         *) exit 0 ;;
     esac
 
-
-    # options=(\
-    # "1 - Switch Branch" \
-    # "2 - Git Merge" \
-    # "3 - Delete Branch" \
-    # "Exit" \
-    # )
-
-    # selected=$(for opt in "${options[@]}" ; do echo $opt ; done | fzf +m \
-    # --header "Select one option:" \
-    # --height 40% \
-    # --layout reverse \
-    # --border \
-    # --color bg:#222222 \
-    # )
-
-    # exit_exception
-
-    # case "$selected" in
-    #     ${options[0]})
-    #         echo "$selected"
-    #         switch_branch
-    #         exit 0
-    #         ;;
-    #     ${options[1]})
-    #         echo "$selected"
-    #         merge
-    #         exit 0
-    #         ;;
-    #     ${options[2]})
-    #         echo "$selected"
-    #         delete_branch
-    #         exit 0
-    #         ;;
-    #     ${options[3]})
-    #         echo "$selected"
-    #         exit 0
-    #         ;;
-    #     *)
-    #     exit 0
-    # esac
 }
 
 main
