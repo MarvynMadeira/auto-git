@@ -508,8 +508,8 @@ function main (){
         *"Switch Branch")       echo ""; switch_branch ;;
         *"Create Branch")       echo ""; create_branch ;;
         *"Delete Branch")       echo ""; delete_branch ;;
-        *"Merge Branch")        echo ""; merge_branch ;;
-        *"Rebase Branch")       echo ""; rebase_branch ;;
+        *"Merge Branch")        echo ""; merge ;;
+        *"Rebase Branch")       echo ""; rebase ;;
         *"Interactive Commit")  echo ""; interactive_commit ;;
         *"Amend Last Commit")   echo ""; amend_commit ;;
         *"Cherry-pick Commit")  echo ""; cherry_pick ;;
