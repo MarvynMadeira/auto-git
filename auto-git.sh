@@ -513,7 +513,6 @@ function main (){
         *"EXIT"|*"──────")      exit 0 ;;
         *) exit 0 ;;
     esac
-
 }
 
 main
