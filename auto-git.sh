@@ -84,7 +84,22 @@ function merge (){
     git merge "$selected"
 }
 
+function rebase (){
+    current=$(git branch | grep "^\*" | tr -d "* ")
 
+    selected=$(git branch | grep -v "^\*" | fzf +m $FZF_COMMON \
+        --header "Rebase onto [$current]:" \
+        --preview \
+            'git -c color.ui=always log --oneline \$(echo {} | tr -d "* ")')
+
+    exit_exception
+
+    selected=$(echo $selected | tr -d '* ')
+
+    echo "Rebasing '$current' onto '$selected'..."
+    
+    git rebase "$selected"
+}
 
 
 function main (){
