@@ -238,6 +238,29 @@ function stash_apply (){
     fi
 }
 
+function stash_drop (){
+    stash_list=$(git stash list)
+
+    if [ -z "$stash_list" ]; then
+        echo "No stashes found."
+        return
+    fi
+
+    selected=$(echo "$stash_list" | fzf +m $FZF_COMMON \
+        --header "  Select stash to DROP" \
+        --preview 'git stash show -p $(echo {} | cut -d: -f1)')
+
+    exit_expection
+    stash_id=$(echo $selected | cut -d: -f1)
+    git stash drop "$stash_id"
+    echo "Stash '$stash_od' dropped."
+}
+
+# TAGS
+
+
+
+
 function main (){
     options=(\
     "1 - Switch Branch" \
