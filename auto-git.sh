@@ -417,6 +417,43 @@ function create_pr() {
 
 # REMOTE
 
+function push_pull() {
+    action=$(printf "push\n pull\n fetch" | fzf +m $FZF_COMMON \
+        --header "Remote operation")
+    
+    exit_exception
+
+    case "$action" in
+        *push)
+            current=$(git branch | grep "^\*" | tr -d "* ")
+
+            upstream=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null)
+
+            if [ -z "$upstream" ]; then
+                echo "Branch \'$current\' doesn't have upstream configured."
+                echo ""
+
+                remote=$(git remote | fzf +m $FZF_COMMON \
+                    --header "Select the remote's destiny:" \
+                    --preview "git remote get-url {}")
+
+                exit_exception
+
+                echo ""
+                echo "Integrating \'$current\' to \'$remote/$current\'..."
+                git push -u "$remote" "$current"
+            else
+                git push
+            fi
+            ;;
+        *pull) 
+            git pull
+            ;;
+        *fetch) 
+            git fetch && echo "Done. Run pull to apply." 
+            ;;
+    esac
+}
 
 
 
