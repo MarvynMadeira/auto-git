@@ -148,7 +148,7 @@ function interactive_commit() {
     fi
 
     echo ""
-    echo -n "Enter commit message: "
+    echo -n "Commit message: "
     read -r msg
 
     if [ -z "$msg" ]; then
@@ -157,6 +157,14 @@ function interactive_commit() {
     fi
 
     git commit -m "$msg"
+
+    echo ""
+    echo -n "Push now? (y/n): "
+    read -r do_push
+    
+    if [[ "$do_push" == "y" || "$do_push" == "Y" ]]; then
+        push_pull_auto   
+    fi
 }
 
 function amend_commit() {
@@ -429,6 +437,22 @@ function create_pr() {
 }
 
 # REMOTE
+
+function push_pull_auto() {
+    current=$(git branch | grep "^\*" | tr -d "* ")
+    upstream=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null)
+
+    if [ -z "$upstream" ]; then
+        remote=$(git remote | fzf +m $FZF_COMMON \
+            --header "Select the remote's destiny: " \
+            --preview "git remote get-url {}")
+        [ -z "$remote" ] && return
+        git push -u "$remote" "$current"
+    else
+        git push
+    fi
+
+}
 
 function push_pull() {
     action=$(printf "push\n pull\n fetch" | fzf +m $FZF_COMMON \
